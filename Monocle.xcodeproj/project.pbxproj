@@ -23,6 +23,8 @@
 		549FBC9D1A8E2A3C0002D8D6 /* Lens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 549FBC9B1A8E295E0002D8D6 /* Lens.swift */; };
 		79FC75651C26EC0700E4BB29 /* LensSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544A7AAA1A8E1CD70056DE25 /* LensSpec.swift */; };
 		79FC75661C26EC0800E4BB29 /* LensSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544A7AAA1A8E1CD70056DE25 /* LensSpec.swift */; };
+		DB10CCDD1C9E5C7000F62FC4 /* LensType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB10CCDC1C9E5C7000F62FC4 /* LensType.swift */; };
+		DB10CCDE1C9E5C7000F62FC4 /* LensType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB10CCDC1C9E5C7000F62FC4 /* LensType.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +85,7 @@
 		549FBC8E1A8E27850002D8D6 /* Nimble.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Nimble.framework; sourceTree = "<group>"; };
 		549FBC8F1A8E27850002D8D6 /* Quick.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Quick.framework; sourceTree = "<group>"; };
 		549FBC9B1A8E295E0002D8D6 /* Lens.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lens.swift; sourceTree = "<group>"; };
+		DB10CCDC1C9E5C7000F62FC4 /* LensType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LensType.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +152,7 @@
 			children = (
 				544A7A9D1A8E1CD70056DE25 /* Monocle.h */,
 				549FBC9B1A8E295E0002D8D6 /* Lens.swift */,
+				DB10CCDC1C9E5C7000F62FC4 /* LensType.swift */,
 				544A7A9B1A8E1CD70056DE25 /* Supporting Files */,
 			);
 			path = Monocle;
@@ -310,7 +314,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0720;
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Robert Böhnke";
 				TargetAttributes = {
 					544A7A971A8E1CD70056DE25 = {
@@ -384,6 +388,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				549FBC9D1A8E2A3C0002D8D6 /* Lens.swift in Sources */,
+				DB10CCDE1C9E5C7000F62FC4 /* LensType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,6 +405,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				549FBC9C1A8E295F0002D8D6 /* Lens.swift in Sources */,
+				DB10CCDD1C9E5C7000F62FC4 /* LensType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,6 +453,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -522,6 +529,7 @@
 				INFOPLIST_FILE = Monocle/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Monocle;
 				SKIP_INSTALL = YES;
 			};
@@ -539,6 +547,7 @@
 				INFOPLIST_FILE = Monocle/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Monocle;
 				SKIP_INSTALL = YES;
 			};
@@ -559,6 +568,7 @@
 				);
 				INFOPLIST_FILE = Specs/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -574,6 +584,7 @@
 				);
 				INFOPLIST_FILE = Specs/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -594,6 +605,7 @@
 				INFOPLIST_FILE = Monocle/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Monocle;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -614,6 +626,7 @@
 				INFOPLIST_FILE = Monocle/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Monocle;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -637,6 +650,7 @@
 				INFOPLIST_FILE = Specs/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 			};
@@ -653,6 +667,7 @@
 				INFOPLIST_FILE = Specs/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.robertboehnke.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;

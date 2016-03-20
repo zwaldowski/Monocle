@@ -58,15 +58,15 @@ class LensSpec: QuickSpec {
             let count = OuterLenses.count
 
             it("should get values") {
-                expect(get(count, example)!).to(equal(2))
+                expect { try count.get(from: example) } == 2
             }
 
             it("should set values") {
-                expect(set(count, example, 4)).to(equal(Outer(count: 4)))
+                expect { try count.set(4, within: example) } == Outer(count: 4)
             }
 
             it("should modify values") {
-                expect(mod(count, example, { $0 + 2 })).to(equal(Outer(count: 4)))
+                expect { try count.modify(example) { $0 + 2 } } == Outer(count: 4)
             }
         }
 
@@ -76,15 +76,15 @@ class LensSpec: QuickSpec {
             let innerCount = OuterLenses.inner >>> InnerLenses.count
 
             it("should get values") {
-                expect(get(innerCount, example)!).to(equal(2))
+                expect { try innerCount.get(from: example) } == 2
             }
 
             it("should set values") {
-                expect(set(innerCount, example, 4)).to(equal(Outer(count: 0, inner: Inner(count: 4))))
+                expect { try innerCount.set(4, within: example) } == Outer(count: 0, inner: Inner(count: 4))
             }
 
             it("should modify values") {
-                expect(mod(innerCount, example, { $0 + 2 })).to(equal(Outer(count: 0, inner: Inner(count: 4))))
+                expect { try innerCount.modify(example) { $0 + 2 } } == Outer(count: 0, inner: Inner(count: 4))
             }
         }
 
@@ -97,32 +97,26 @@ class LensSpec: QuickSpec {
                     Inner(count: 4)
                 ]
 
-                let lifted = lift(InnerLenses.count)
+                let lifted = InnerLenses.count.lift()
 
                 it("should get values") {
-                    let result = get(lifted, inner)
-
-                    expect(result).to(equal([ 1, 2, 3, 4 ]))
+                    expect { try lifted.get(from: inner) } == [ 1, 2, 3, 4 ]
                 }
 
                 it("should set values") {
-                    let result = set(lifted, inner, [ 2, 4, 6, 8 ])
-
-                    expect(result).to(equal([
+                    expect { try lifted.set([ 2, 4, 6, 8 ], within: inner) } == [
                         Inner(count: 2),
                         Inner(count: 4),
                         Inner(count: 6),
                         Inner(count: 8)
-                    ]))
+                    ]
                 }
 
                 it("should reduce the resulting array size accordingly") {
                     // Does this make sense?
-                    let result = set(lifted, inner, [ 42 ])
-
-                    expect(result).to(equal([
+                    expect { try lifted.set([ 42 ], within: inner) } == [
                         Inner(count: 42)
-                    ]))
+                    ]
                 }
             }
         }
@@ -134,18 +128,18 @@ class LensSpec: QuickSpec {
             let both = OuterLenses.count *** InnerLenses.count
 
             it("should get values") {
-                let result = get(both, (outer, inner))
+                let result = try! both.get(from: (outer, inner))
 
-                expect(result.0).to(equal(2))
-                expect(result.1).to(equal(9))
+                expect(result.0) == 2
+                expect(result.1) == 9
             }
 
             it("should set values") {
-                let result = set(both, (outer, inner), (12, 34))
+                let result = try! both.set((12, 34), within: (outer, inner))
 
-                expect(result.0.count).to(equal(12))
-                expect(result.0.inner.count).to(equal(4))
-                expect(result.1.count).to(equal(34))
+                expect(result.0.count) == 12
+                expect(result.0.inner.count) == 4
+                expect(result.1.count) == 34
             }
         }
 
@@ -155,17 +149,17 @@ class LensSpec: QuickSpec {
             let both = OuterLenses.count &&& (OuterLenses.inner >>> InnerLenses.count)
 
             it("should get values") {
-                let result = get(both, example)
+                let result = try! both.get(from: example)
 
-                expect(result.0).to(equal(0))
-                expect(result.1).to(equal(2))
+                expect(result.0) == 0
+                expect(result.1) == 2
             }
 
             it("should set values") {
-                let result = set(both, example, (12, 34))
+                let result = try! both.set((12, 34), within: example)
 
-                expect(result.count).to(equal(12))
-                expect(result.inner.count).to(equal(34))
+                expect(result.count) == 12
+                expect(result.inner.count) == 34
             }
         }
     }

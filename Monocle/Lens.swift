@@ -6,67 +6,44 @@
 //  Copyright (c) 2015 Robert Böhnke. All rights reserved.
 //
 
-public struct Lens<A, B> {
-    private let get: A -> B
-    private let set: (A, B) -> A
+import Swift
 
-    public init(get: A -> B, set: (A, B) -> A) {
-        self.get = get
-        self.set = set
+public struct Lens<A, B> {
+    public typealias Get = A throws -> B
+    public typealias Set = (inout A, B) throws -> Void
+
+    private let getter: Get
+    private let setter: Set
+
+    public init(get getter: Get, set setter: Set) {
+        self.getter = getter
+        self.setter = setter
     }
 
-    public init(get: A -> B, set: (inout A, B) -> ()) {
-        self.get = get
-        self.set = { (var a, b) in
-            set(&a, b)
-            return a
+    public init(get getter: Get, set setter: (A, B) throws -> A) {
+        self.getter = getter
+        self.setter = { (inout a: A, b) throws in
+            a = try setter(a, b)
         }
     }
 }
 
-// MARK: - Basics
+extension Lens: LensType {
 
-public func get<A, B>(lens: Lens<A, B>, _ a: A) -> B {
-    return lens.get(a)
-}
+    public typealias Whole = A
+    public typealias Part = B
 
-public func get<A, B>(lens: Lens<A, B>)(_ a: A) -> B {
-    return lens.get(a)
-}
+    public func get(from whole: Whole) throws -> Part {
+        return try getter(whole)
+    }
 
-public func get<A, B>(lens: Lens<A, B>, _ a: A?) -> B? {
-    return a.map(lens.get)
-}
+    public func set(part: Part, inout within whole: Whole) throws {
+        try setter(&whole, part)
+    }
 
-public func get<A, B>(lens: Lens<A, B>)(_ a: A?) -> B? {
-    return a.map(lens.get)
-}
-
-public func set<A, B>(lens: Lens<A, B>, _ a: A, _ b: B) -> A {
-    return lens.set(a, b)
-}
-
-public func set<A, B>(lens: Lens<A, B>, _ a: A)(_ b: B) -> A {
-    return lens.set(a, b)
-}
-
-public func mod<A, B>(lens: Lens<A, B>, _ a: A, _ f: B -> B) -> A {
-    return set(lens, a, f(get(lens, a)))
 }
 
 // MARK: - Compose
-
-public func compose<A, B, C>(left: Lens<A, B>, _ right: Lens<B, C>) -> Lens<A, C> {
-    let get: A -> C = { a in
-        return right.get(left.get(a))
-    }
-
-    let set: (A, C) -> A = { a, c in
-        return left.set(a, right.set(left.get(a), c))
-    }
-
-    return Lens(get: get, set: set)
-}
 
 infix operator >>> {
     associativity right
@@ -74,7 +51,7 @@ infix operator >>> {
 }
 
 public func >>> <A, B, C>(lhs: Lens<A, B>, rhs: Lens<B, C>) -> Lens<A, C> {
-    return compose(lhs, rhs)
+    return lhs.compose(with: rhs)
 }
 
 infix operator <<< {
@@ -83,36 +60,38 @@ infix operator <<< {
 }
 
 public func <<< <A, B, C>(lhs: Lens<B, C>, rhs: Lens<A, B>) -> Lens<A, C> {
-    return compose(rhs, lhs)
+    return rhs.compose(with: lhs)
+}
+
+extension LensType {
+
+    public func compose<Other: LensType where Other.Whole == Part>(with other: Other) -> Lens<Whole, Other.Part> {
+        return .init(get: { outer in
+            try other.get(from: self.get(from: outer))
+        }, set: { (inout outer: Whole, part) in
+            var inner = try self.get(from: outer)
+            try other.set(part, within: &inner)
+            try self.set(inner, within: &outer)
+        })
+    }
+
 }
 
 // MARK: - Lift
 
-public func lift<A, B>(lens: Lens<A, B>) -> Lens<[A], [B]> {
-    let get: [A] -> [B] = { xs in
-        return xs.map(lens.get)
-    }
+extension LensType {
 
-    let set: ([A], [B]) -> [A] = { xs, ys in
-        return zip(xs, ys).map(lens.set)
+    public func lift() -> Lens<[Whole], [Part]> {
+        return .init(get: { whole in
+            try whole.map(self.get)
+        }, set: { (wholes, parts) in
+            try zip(parts, wholes).map(self.set)
+        })
     }
-
-    return Lens(get: get, set: set)
+    
 }
 
 // MARK: - Split
-
-public func split<A, B, C, D>(left: Lens<A, B>, _ right: Lens<C, D>) -> Lens<(A, C), (B, D)> {
-    let get: (A, C) -> (B, D) = { (a, c) in
-        return (left.get(a), right.get(c))
-    }
-
-    let set: ((A, C), (B, D)) -> (A, C) = { (fst, snd) in
-        return (left.set(fst.0, snd.0), right.set(fst.1, snd.1))
-    }
-
-    return Lens(get: get, set: set)
-}
 
 infix operator *** {
     associativity left
@@ -120,22 +99,23 @@ infix operator *** {
 }
 
 public func *** <A, B, C, D>(lhs: Lens<A, B>, rhs: Lens<C, D>) -> Lens<(A, C), (B, D)> {
-    return split(lhs, rhs)
+    return lhs.split(from: rhs)
+}
+
+extension LensType {
+
+    public func split<Other: LensType>(from other: Other) -> Lens<(Whole, Other.Whole), (Part, Other.Part)> {
+        return .init(get: { (first, second) in
+            try (self.get(from: first), other.get(from: second))
+        }, set: { (inout wholes: (Whole, Other.Whole), parts) in
+            try self.set(parts.0, within: &wholes.0)
+            try other.set(parts.1, within: &wholes.1)
+        })
+    }
+
 }
 
 // MARK: - Fanout
-
-public func fanout<A, B, C>(left: Lens<A, B>, _ right: Lens<A, C>) -> Lens<A, (B, C)> {
-    let get: A -> (B, C) = { a in
-        return (left.get(a), right.get(a))
-    }
-
-    let set: (A, (B, C)) -> A = { (a, input) in
-        return right.set(left.set(a, input.0), input.1)
-    }
-
-    return Lens(get: get, set: set)
-}
 
 infix operator &&& {
     associativity left
@@ -143,5 +123,75 @@ infix operator &&& {
 }
 
 public func &&& <A, B, C>(lhs: Lens<A, B>, rhs: Lens<A, C>) -> Lens<A, (B, C)> {
-    return fanout(lhs, rhs)
+    return lhs.fanout(from: rhs)
+}
+
+extension LensType {
+
+    public func fanout<Other: LensType where Other.Whole == Whole>(from other: Other) -> Lens<Whole, (Part, Other.Part)> {
+        return .init(get: { whole in
+            try (self.get(from: whole), other.get(from: whole))
+        }, set: { (inout whole: Whole, parts) in
+            try self.set(parts.0, within: &whole)
+            try other.set(parts.1, within: &whole)
+        })
+    }
+
+}
+
+// MARK: - Unavailable
+
+@available(*, unavailable, message="call the 'get(from:)' method on the lens")
+public func get<A, B>(lens: Lens<A, B>, _ a: A) throws -> B {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="use the 'get(from:)' method on the lens' type")
+public func get<A, B>(lens: Lens<A, B>)(_ a: A) throws -> B {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'get(from:)' method on the lens")
+public func get<A, B>(lens: Lens<A, B>, _ a: A?) throws -> B? {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="use the 'get(from:)' method on the lens' type")
+public func get<A, B>(lens: Lens<A, B>)(_ a: A?) throws -> B? {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'set(within:value:)' method on the lens")
+public func set<A, B>(lens: Lens<A, B>, _ a: A, _ b: B) throws -> A {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="use the 'set(within:value:)' method on the lens' type")
+public func set<A, B>(lens: Lens<A, B>, _ a: A)(_ b: B) throws -> A {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'modify(_:transform:)' method on the lens")
+public func mod<A, B>(lens: Lens<A, B>, _ a: A, _ f: B -> B) throws -> A {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'compose(with:)' method on the lens")
+public func compose<A, B, C>(left: Lens<A, B>, _ right: Lens<B, C>) -> Lens<A, C> {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'lift()' method on the lens")
+public func lift<A, B>(lens: Lens<A, B>) -> Lens<[A], [B]> {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'split(from:)' method on the lens")
+public func split<A, B, C, D>(left: Lens<A, B>, _ right: Lens<C, D>) -> Lens<(A, C), (B, D)> {
+    fatalError("unavailable function can't be called")
+}
+
+@available(*, unavailable, message="call the 'fanout(from:)' method on the lens")
+public func fanout<A, B, C>(left: Lens<A, B>, _ right: Lens<A, C>) -> Lens<A, (B, C)> {
+    fatalError("unavailable function can't be called")
 }
