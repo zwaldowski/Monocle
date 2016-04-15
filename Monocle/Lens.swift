@@ -147,7 +147,7 @@ public func get<A, B>(lens: Lens<A, B>, _ a: A) throws -> B {
 }
 
 @available(*, unavailable, message="use the 'get(from:)' method on the lens' type")
-public func get<A, B>(lens: Lens<A, B>)(_ a: A) throws -> B {
+public func get<A, B>(lens: Lens<A, B>) -> (a: A) throws -> B {
     fatalError("unavailable function can't be called")
 }
 
@@ -157,7 +157,7 @@ public func get<A, B>(lens: Lens<A, B>, _ a: A?) throws -> B? {
 }
 
 @available(*, unavailable, message="use the 'get(from:)' method on the lens' type")
-public func get<A, B>(lens: Lens<A, B>)(_ a: A?) throws -> B? {
+public func get<A, B>(lens: Lens<A, B>) -> (a: A?) throws -> B? {
     fatalError("unavailable function can't be called")
 }
 
@@ -167,7 +167,7 @@ public func set<A, B>(lens: Lens<A, B>, _ a: A, _ b: B) throws -> A {
 }
 
 @available(*, unavailable, message="use the 'set(within:value:)' method on the lens' type")
-public func set<A, B>(lens: Lens<A, B>, _ a: A)(_ b: B) throws -> A {
+public func set<A, B>(lens: Lens<A, B>, _ a: A) -> (b: B) throws -> A {
     fatalError("unavailable function can't be called")
 }
 

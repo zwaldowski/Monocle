@@ -7,8 +7,8 @@
 //
 
 public protocol LensType {
-    typealias Whole
-    typealias Part
+    associatedtype Whole
+    associatedtype Part
 
     func get(from whole: Whole) throws -> Part
     func set(part: Part, inout within whole: Whole) throws
